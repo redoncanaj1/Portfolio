@@ -1,15 +1,18 @@
 import { ChangeEvent, useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
+import { motion, AnimatePresence } from 'framer-motion';
 import bg from '../assets/images/bg.jpg';
-import section4 from '../assets/images/section4.jpg';
+import section4 from '../assets/images/section4.avif';
 import section2 from '../assets/images/section2.avif';
 import bgGps from '../assets/images/bgGps.avif';
 import Construction from '../assets/images/Construction.jpg';
 import PetExpo from '../assets/images/PetExpo.jpg';
 import Piperke from '../assets/images/Piperke.jpg';
 import logo from '../assets/images/logo.png';
+import { FiGithub, FiGitlab, FiLinkedin, FiMail, FiPhone, FiMapPin, FiSend, FiDownload} from 'react-icons/fi';
 
-// Types
+
+
 type Experience = {
   company: string;
   period: string;
@@ -36,8 +39,7 @@ type FormData = {
 };
 
 const Home = () => {
-  // State
-  const [expandedCards, setExpandedCards] = useState<number[]>([]);
+  const [expandedCards] = useState<number[]>([]);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -50,7 +52,54 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedProject, setExpandedProject] = useState<number | null>(null);
 
-  // Data
+ 
+    const container = {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.1,
+          delayChildren: 0.3
+        }
+      }
+    };
+  
+    const item = {
+      hidden: { y: 20, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: { 
+          type: "spring",
+          stiffness: 100,
+          damping: 10
+        }
+      }
+    };
+  
+
+  
+    const buttonHover = {
+      hover: {
+        scale: 1.03,
+        boxShadow: "0 5px 15px rgba(59, 130, 246, 0.4)",
+        transition: {
+          type: "spring",
+          stiffness: 400
+        }
+      },
+      tap: {
+        scale: 0.98
+      }
+    };
+  
+    const inputFocus = {
+      focus: {
+        scale: 1.02,
+        boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"
+      }
+    };
+  
   const experiences: Experience[] = [
     {
       company: "CodeLab",
@@ -141,14 +190,6 @@ const Home = () => {
     }
   ];
 
-  // Handlers
-  const toggleCard = (index: number) => {
-    setExpandedCards(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index) 
-        : [...prev, index]
-    );
-  };
 
   const toggleExpand = (projectId: number) => {
     setExpandedProject(expandedProject === projectId ? null : projectId);
@@ -188,10 +229,7 @@ const Home = () => {
     try {
       emailjs.init('_KhofNRTLbCz3JlB3');
 
-      // Email to owner
-      await emailjs.send(
-        'service_caehflj', 
-        'template_8wynqxv',
+      await emailjs.send('service_caehflj', 'template_8wynqxv',
         {
           from_name: formData.name,
           from_email: formData.email,
@@ -201,15 +239,12 @@ const Home = () => {
           to_name: 'Redon'
         }
       );
-
-      await emailjs.send(
-        'service_caehflj',
-        'template_8wynqxv',
+      await emailjs.send('service_caehflj', 'template_aafu7um', 
         {
           to_name: formData.name,
           to_email: formData.email,
           from_name: 'Redon Canaj',
-          reply_to: 'redoncanal1@gmail.com',
+          reply_to: 'redoncanaj1@gmail.com',
           message: `Dear ${formData.name},\n\nThank you for reaching out. I've received your message and will respond shortly.\n\nBest regards,\nRedon Canaj`
         }
       );
@@ -229,7 +264,6 @@ const Home = () => {
     }
   };
 
-  // Effects
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollButton(window.scrollY > 300);
@@ -239,7 +273,6 @@ const Home = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Render
   return (
     <>
       {showScrollButton && (
@@ -294,6 +327,7 @@ const Home = () => {
             </a>
           ))}
         </div>
+        <div></div>
       </nav>
 
       {isMenuOpen && (
@@ -312,8 +346,10 @@ const Home = () => {
               >
                 {section.charAt(0).toUpperCase() + section.slice(1)}
               </a>
+              
             ))}
           </div>
+          
         </div>
       )}
 
@@ -369,60 +405,156 @@ const Home = () => {
         </div>
       </div>
 
-      <section id="about" className="w-full bg-black text-white font-mono py-16 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-8 text-center">About Me</h2>
-          <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
-          <div className="grid md:grid-cols-2 gap-8 mt-6">
-            <div>
-              <h3 className="text-2xl font-semibold mb-4 text-blue-400">Who I Am</h3>
-              <p className="mb-4">
+      <section id="about" className="w-full bg-black text-white py-20 px-4 md:px-8 overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={container}
+          className="text-center mb-16"
+        >
+          <motion.h2 
+            variants={item}
+            className="text-4xl md:text-5xl font-bold mb-4"
+          >
+            About Me
+          </motion.h2>
+          <motion.div 
+            variants={item}
+            className="w-20 h-1 bg-blue-600 mx-auto"
+          />
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Left Column - Who I Am */}
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h3 className="text-2xl font-semibold mb-6 text-blue-400">Who I Am</h3>
+            <div className="space-y-4">
+              <motion.p 
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
                 I'm a passionate front-end developer with expertise in React.js, TypeScript, and modern web technologies. 
                 I combine technical skills from my Computer Science background with business understanding from my 
                 Master's in Business Informatics to create impactful digital solutions.
-              </p>
-              <p className="mb-4">
+              </motion.p>
+              
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
                 Currently working at CodeLab, I thrive in dynamic environments where I can design and implement 
                 responsive, user-friendly interfaces that solve real-world problems.
-              </p>
-              <p>
+              </motion.p>
+              
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
                 When I'm not coding, you can find me traveling or enjoying sports - both of which help me maintain 
                 the energy and creativity I bring to my development work.
-              </p>
+              </motion.p>
             </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h3 className="text-2xl font-semibold mb-6 text-blue-400">My Skills</h3>
             
-            <div>
-              <h3 className="text-2xl font-semibold mb-4 text-blue-400">My Skills</h3>
-              <div className="mb-6">
-                <h4 className="text-xl mb-2">Core Technologies:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {['React.js', 'TypeScript', 'Next.js', 'Tailwind CSS', 'JavaScript', 'HTML/CSS'].map(tech => (
-                    <span key={tech} className="bg-gray-800 px-3 py-1 rounded">{tech}</span>
-                  ))}
-                </div>
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mb-8"
+            >
+              <h4 className="text-xl mb-4">Core Technologies:</h4>
+              <div className="flex flex-wrap gap-3">
+                {['React.js', 'TypeScript', 'Next.js', 'Tailwind CSS', 'JavaScript', 'HTML/CSS'].map((tech, index) => (
+                  <motion.span
+                    key={tech}
+                    initial={{ y: 20, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + (index * 0.05) }}
+                    className="px-3 py-1.5 bg-gray-800 rounded-full text-sm"
+                  >
+                    {tech}
+                  </motion.span>
+                ))}
               </div>
-              
-              <div className="mb-6">
-                <h4 className="text-xl mb-2">Education:</h4>
-                <ul className="space-y-2">
-                  <li>🎓 <strong>Master's in Business Informatics</strong> - University of Tirana</li>
-                  <li>🎓 <strong>Bachelor's in Computer Science</strong> - University of Tirana</li>
-                  <li>📚 <strong>MERN Stack Certification</strong> - BetaPlan</li>
-                  <li>📚 <strong>PHP/Laravel Certification</strong> - ICTSLab</li>
-                </ul>
-              </div>
-              
-              <a 
+            </motion.div>
+            
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="mb-8"
+            >
+              <h4 className="text-xl mb-4">Education:</h4>
+              <ul className="space-y-3">
+                {[
+                  { icon: '🎓', text: 'Master\'s in Business Informatics - University of Tirana' },
+                  { icon: '🎓', text: 'Bachelor\'s in Computer Science - University of Tirana' },
+                  { icon: '📚', text: 'MERN Stack Certification - BetaPlan' },
+                  { icon: '📚', text: 'PHP/Laravel Certification - ICTSLab' }
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ y: 20, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + (index * 0.1) }}
+                    className="flex items-start"
+                  >
+                    <span className="mr-2">{item.icon}</span>
+                    <span>{item.text}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+            
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.a 
                 href="Redon_Canaj_CV.pdf"	
                 download="Redon_Canaj_CV.pdf"
-                className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors"
+                whileHover={{ 
+                  y: -3,
+                  boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)"
+                }}
+                whileTap={{ scale: 0.98 }}
               >
+                <FiDownload className="mr-2" />
                 Download Full Resume
-              </a>
-            </div>
-          </div>
+              </motion.a>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </div>
+    </section>
 
       <section id="experience" className="relative w-full bg-black text-white font-mono py-16 px-4 md:px-8">
         <div 
@@ -441,11 +573,14 @@ const Home = () => {
           </div>
           
           <div className="max-w-6xl mx-auto space-y-6">
-            {experiences.map((exp, index) => (
-              <div 
+          {experiences.map((exp, index) => (
+              <motion.div
                 key={index}
-                className={`group bg-gray-900/70 relative overflow-hidden rounded-xl border border-gray-800 hover:border-blue-600 transition-all duration-300 cursor-pointer ${expandedCards.includes(index) ? 'border-blue-600' : ''}`}
-                onClick={() => toggleCard(index)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
               >
                 <div className="w-full text-left p-6">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-baseline">
@@ -459,6 +594,7 @@ const Home = () => {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {exp.technologies.map(tech => (
                       <span key={tech} className="text-xs bg-gray-800 px-3 py-1 rounded-full">{tech}</span>
+                      
                     ))}
                   </div>
                 </div>
@@ -472,7 +608,8 @@ const Home = () => {
                     ))}
                   </ul>
                 </div>
-              </div>
+              </motion.div>
+              
             ))}
           </div>
         </div>
@@ -483,7 +620,15 @@ const Home = () => {
           <h2 className="text-4xl font-bold mb-4 text-center">My Projects</h2>
           <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
           <div className="grid md:grid-cols-2 gap-8 mt-6">
-            {projects.map((project) => (
+          {projects.map((project, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+            >
               <div 
                 key={project.id}
                 className={`bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 ${expandedProject === project.id ? 'expanded' : ''}`}
@@ -553,181 +698,317 @@ const Home = () => {
                   )}
                 </div>
               </div>
+            </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="contact" className="relative min-h-screen w-full bg-black text-white font-mono py-16 px-4 md:px-8">
-        <div 
-          className="absolute inset-0 bg-no-repeat bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url(${section4})`,
-            filter: 'blur(3px)',
-            opacity: 0.9
-          }}
-        />
+      <section 
+      id="contact" 
+      className="relative  h-100vh w-full bg-black text-white py-20 px-4 md:px-8 overflow-hidden"
+    >
+      <motion.div 
+        className="absolute inset-0 bg-no-repeat bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${section4})`,
+          filter: 'blur(1px)',
+          opacity: 0.9
+        }}
+        initial={{ scale: 1.1 }}
+        whileInView={{ scale: 1 }}
+        transition={{ duration: 1 }}
+      />
+      
+      <div className="absolute inset-0 bg-black/50 z-0"></div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={container}
+          className="text-center mb-16"
+        >
+          <motion.h2 
+            variants={item}
+            className="text-4xl md:text-5xl font-bold mb-4 text-white"
+          >
+            Get In Touch
+          </motion.h2>
+          <motion.div 
+            variants={item}
+            className="w-20 h-1 bg-blue-600 mx-auto mb-6"
+          />
+          <motion.p 
+            variants={item}
+            className="text-xl text-gray-300 max-w-2xl mx-auto"
+          >
+            Have a project in mind or want to discuss potential opportunities?
+          </motion.p>
+        </motion.div>
         
-        <div className="absolute inset-0 bg-black/50 z-0"></div>
         
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-white">Get In Touch</h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
-            <p className="mt-6 text-white max-w-2xl mx-auto">
-              Have a project in mind or want to discuss potential opportunities? Feel free to reach out!
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="bg-gray-900/70 backdrop-blur-sm p-8 rounded-xl">
-              <h3 className="text-2xl font-semibold mb-6 text-blue-400">Contact Information</h3>
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white mb-1">Email</h4>
-                    <a href="mailto:Redoncanal1@gmail.com" className="text-gray-300 hover:text-blue-400 transition-colors">
-                      Redoncanal1@gmail.com
-                    </a>
-                  </div>
+        <div className="grid md:grid-cols-2 gap-8 ">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={container}
+            className="space-y-6 bg-gray-900/60 backdrop-blur-md p-8 rounded-xl border border-gray-800"
+          >
+            <motion.div 
+              variants={item}
+              whileHover="hover"
+              className=" backdrop-blur-md p-6 rounded-xl border border-gray-800"
+            >
+              <div className="flex items-start">
+                <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
+                  <FiMail className="w-6 h-6 text-blue-400" />
                 </div>
-                
-                <div className="flex items-start">
-                  <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white mb-1">Phone</h4>
-                    <a href="tel:+355693606568" className="text-gray-300 hover:text-blue-400 transition-colors">
-                      +355 69 360 6568
-                    </a>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white mb-1">Location</h4>
-                    <p className="text-gray-300">Tirana, Albania</p>
-                  </div>
+                <div>
+                  <h4 className="font-medium text-white mb-1">Email</h4>
+                  <a 
+                    href="mailto:Redoncanal1@gmail.com" 
+                    className="text-gray-300 hover:text-blue-400 transition-colors"
+                  >
+                    Redoncanal1@gmail.com
+                  </a>
                 </div>
               </div>
-
-              <div className="mt-12">
-                <h3 className="text-2xl font-semibold mb-6 text-blue-400">Connect With Me</h3>
-                <div className="flex space-x-4">
-                  <a href="https://github.com/redoncanaj1" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-blue-400 transition-colors">
-                    <span className="sr-only">GitHub</span>
-                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                    </svg>
+            </motion.div>
+            
+            <motion.div 
+              variants={item}
+              whileHover="hover"
+              className="backdrop-blur-md p-6 rounded-xl border border-gray-800"
+            >
+              <div className="flex items-start">
+                <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
+                  <FiPhone className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white mb-1">Phone</h4>
+                  <a 
+                    href="tel:+355693606568" 
+                    className="text-gray-300 hover:text-blue-400 transition-colors"
+                  >
+                    +355 69 360 6568
                   </a>
-                  <a href="https://gitlab.com/Redoncanaj" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-blue-400 transition-colors">
-                    <span className="sr-only">GitLab</span>
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M4.844.904a1.007 1.007 0 00-.955.692l-2.53 7.783c0 .007-.005.012-.007.02L.07 13.335a1.437 1.437 0 00.522 1.607l11.072 8.045a.566.566 0 00.67-.004l11.074-8.04a1.436 1.436 0 00.522-1.61l-1.26-3.867v-.008l-2.525-7.785a1.006 1.006 0 00-.957-.684.987.987 0 00-.949.69l-2.408 7.408H8.203l-2.41-7.408a.987.987 0 00-.943-.69h-.006zm-.006 1.42l2.174 6.678H2.674l2.164-6.678zm14.328 0l2.168 6.678h-4.342l2.174-6.678zm-10.594 7.81h6.862l-2.15 6.618L12 20.693l-5.328-3.758-2.168-6.666z" />
-              </svg>
-            </a>
-            <a href="https://al.linkedin.com/in/redon-canaj-2ab666136" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-blue-400 transition-colors">
-              <span className="sr-only">LinkedIn</span>
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-              </svg>
-            </a>
-          </div>
+                </div>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              variants={item}
+              whileHover="hover"
+              className=" backdrop-blur-md p-6 rounded-xl border border-gray-800"
+            >
+              <div className="flex items-start">
+                <div className="bg-blue-600/20 p-3 rounded-lg mr-4">
+                  <FiMapPin className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white mb-1">Location</h4>
+                  <p className="text-gray-300">Tirana, Albania</p>
+                </div>
+              </div>
+            </motion.div>
+
+           
+            <motion.div 
+              variants={container}
+              className="pt-6 "
+            >
+              <h3 className="text-2xl font-semibold mb-6  text-blue-400">Connect With Me</h3>
+              <div className="flex space-x-6">
+                {[
+                  { icon: <FiGithub />, url: "https://github.com/redoncanaj1" },
+                  { icon: <FiGitlab />, url: "https://gitlab.com/Redoncanaj" },
+                  { icon: <FiLinkedin />, url: "https://www.linkedin.com/in/redon-canaj-2ab666136/" },
+                  { icon: <FiMail />, url: "mailto:redoncanaj1@gmail.com" }
+                ].map((social, index) => (
+                  <motion.a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-blue-400 text-2xl"
+                    whileHover={{ 
+                      y: -5,
+                      scale: 1.2,
+                      color: "#60a5fa"
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {social.icon}
+                  </motion.a>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Contact Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gray-900/60 backdrop-blur-md p-8 rounded-xl border border-gray-800"
+          >
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {[
+                { id: "name", label: "Name", type: "text" },
+                { id: "email", label: "Email", type: "email" },
+                { id: "phone", label: "Phone", type: "tel" }
+              ].map((field) => (
+                <motion.div
+                  key={field.id}
+                  whileHover={{ scale: 1.01 }}
+                  whileFocus="focus"
+                  variants={inputFocus}
+                >
+                  <label htmlFor={field.id} className="block text-sm font-medium text-white mb-2">
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    id={field.id}
+                    name={field.id}
+                    value={formData[field.id as keyof FormData]}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </motion.div>
+              ))}
+              
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                whileFocus="focus"
+                variants={inputFocus}
+              >
+                <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={5}
+                  required
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </motion.div>
+
+              <AnimatePresence>
+                {submitMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`overflow-hidden rounded-lg ${
+                      submitMessage.includes('Thank you') 
+                        ? 'bg-green-900/30 text-green-400 border border-green-800' 
+                        : 'bg-red-900/30 text-red-400 border border-red-800'
+                    }`}
+                  >
+                    <div className="p-4">
+                      {submitMessage}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2"
+                whileHover="hover"
+                whileTap="tap"
+                variants={buttonHover}
+              >
+                {isSubmitting ? (
+                  <motion.span
+                    animate={{ 
+                      opacity: [0.6, 1, 0.6],
+                      transition: { repeat: Infinity, duration: 1.5 }
+                    }}
+                  >
+                    Sending...
+                  </motion.span>
+                ) : (
+                  <>
+                    <FiSend />
+                    Send Message
+                  </>
+                )}
+              </motion.button>
+            </form>
+          </motion.div>
         </div>
       </div>
+    </section>
+    <section>
+    <motion.footer 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={item}
+      className="bg-gray-900 text-gray-300 py-12 px-6 border-t border-gray-800"
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          {/* Left side - Branding */}
+          <motion.div 
+            variants={item}
+            className="mb-6 md:mb-0 text-center md:text-left"
+          >
+            <h2 className="text-xl font-bold">
+              Redon<span className="text-blue-400">Canaj</span>
+            </h2>
+            <p className="mt-2">Frontend Developer</p>
+          </motion.div>
 
-      <div className="bg-gray-900/70 backdrop-blur-sm p-8 rounded-xl">
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-white mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-white mb-1">
-              Phone
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-white mb-1">
-              Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              onChange={handleInputChange}
-              value={formData.message}
-              rows={4}
-              required
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            ></textarea>
-          </div>
+          <motion.div 
+          variants={item}
+          className="text-center text-sm text-gray-500"
+        >
+          <p>© {new Date().getFullYear()} Redon Canaj. All rights reserved.</p>
 
-          {submitMessage && (
-            <div className={`p-3 rounded-lg ${submitMessage.includes('Thank you') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {submitMessage}
-            </div>
-          )}
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors duration-300"
-            >
-              {isSubmitting ? 'Sending...' : 'Send Message'}
-            </button>
-          </div>
-        </form>
+        </motion.div>
+
+          <motion.div 
+            variants={item}
+            className="flex space-x-6"
+          >
+            {[
+              { icon: <FiGithub />, url: "https://github.com/redoncanaj1" },
+              { icon: <FiGitlab />, url: "https://gitlab.com/Redoncanaj" },
+              { icon: <FiLinkedin />, url: "https://www.linkedin.com/in/redon-canaj-2ab666136/" },
+              { icon: <FiMail />, url: "mailto:redoncanaj1@gmail.com" }
+            ].map((social, index) => (
+              <motion.a
+                key={index}
+               
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-2xl text-gray-400 hover:text-blue-400"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                {social.icon}
+              </motion.a>
+            ))}
+          </motion.div>
+        </div>
+
+        
       </div>
-    </div>
-  </div>
-</section>
+    </motion.footer>
+    </section>
         </>
         );
     };
