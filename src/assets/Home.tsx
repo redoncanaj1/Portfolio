@@ -39,7 +39,7 @@ type FormData = {
 };
 
 const Home = () => {
-  const [expandedCards] = useState<number[]>([]);
+  const [expandedCards, setExpandedCards] = useState<number[]>([]);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -190,7 +190,13 @@ const Home = () => {
     }
   ];
 
-
+  const toggleCard = (index: number) => {
+    setExpandedCards(prev => 
+      prev.includes(index) 
+        ? [] 
+        : [index]
+    );
+  };
   const toggleExpand = (projectId: number) => {
     setExpandedProject(expandedProject === projectId ? null : projectId);
   };
@@ -225,49 +231,66 @@ const Home = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitMessage('');
-
+  
     try {
-      emailjs.init('_KhofNRTLbCz3JlB3');
-
-      await emailjs.send('service_caehflj', 'template_8wynqxv',
+      // First send the contact form message to yourself
+      const response = await emailjs.send(
+        'service_caehflj', // Service ID
+        'template_8wynqxv', // Contact form template ID
         {
           from_name: formData.name,
           from_email: formData.email,
           phone: formData.phone,
           message: formData.message,
           reply_to: formData.email,
-          to_name: 'Redon'
-        }
+        },
+        'M7r-4ZgifXea9oVcb' // Public key
       );
-      await emailjs.send('service_caehflj', 'template_aafu7um', 
-        {
-          to_name: formData.name,
-          to_email: formData.email,
-          from_name: 'Redon Canaj',
-          reply_to: 'redoncanaj1@gmail.com',
-          message: `Dear ${formData.name},\n\nThank you for reaching out. I've received your message and will respond shortly.\n\nBest regards,\nRedon Canaj`
-        }
-      );
-
-      setSubmitMessage('Thank you! Your message has been sent successfully.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: ''
-      });
+  
+      // If successful, send the thank you email to the user
+      if (response.status === 200 || response.text.includes("Successful response")) {
+        setSubmitMessage('Thank you! Your message has been sent successfully.');
+  
+        // Send confirmation email to the user
+        await emailjs.send(
+          'service_caehflj', // Service ID
+          'template_aafu7um', // Confirmation template ID
+          {
+            to_email: formData.email,
+            user_name: formData.name,
+            subject: 'Thank you for your message',
+            message: 'Thank you for reaching out! We have received your message and will get back to you soon.',
+          },
+          'M7r-4ZgifXea9oVcb' // Public key
+        );
+  
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Email failed to send');
+      }
     } catch (error) {
-      setSubmitMessage('Error sending message. Please try again later.');
       console.error('EmailJS error:', error);
+      setSubmitMessage('Error sending message. Please try again or email me directly.');
     } finally {
       setIsSubmitting(false);
     }
-  };
+};
 
+// Initialize EmailJS
+useEffect(() => {
+    emailjs.init('M7r-4ZgifXea9oVcb'); // Public key
+}, []);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollButton(window.scrollY > 300);
     };
+
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -323,7 +346,7 @@ const Home = () => {
               }}
               className="hover:text-gray-300 hover:scale-110 transition"
             >
-              // {section.charAt(0).toUpperCase() + section.slice(1)}
+              • {section.charAt(0).toUpperCase() + section.slice(1)}
             </a>
           ))}
         </div>
@@ -493,7 +516,7 @@ const Home = () => {
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3 + (index * 0.05) }}
-                    className="px-3 py-1.5 bg-gray-800 rounded-full text-sm"
+                    className="px-3 py-1.5 bg-gray-800 rounded-full text-sm hover:bg-[#51a2ff] transition duration-300"
                   >
                     {tech}
                   </motion.span>
@@ -556,153 +579,178 @@ const Home = () => {
       </div>
     </section>
 
-      <section id="experience" className="relative w-full bg-black text-white font-mono py-16 px-4 md:px-8">
-        <div 
-          className="absolute inset-0 bg-no-repeat bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url(${section2})`,
-            filter: 'blur(3px)',
-            opacity: 0.9
-          }}
-        />  
-        <div className="absolute inset-0 z-0"></div>
-        <div className="relative z-20 max-w-6xl mx-auto"> 
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-white">My Experience</h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
-          </div>
-          
-          <div className="max-w-6xl mx-auto space-y-6">
-          {experiences.map((exp, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
-              >
-                <div className="w-full text-left p-6">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-baseline">
-                    <h3 className="text-2xl font-semibold text-blue-400 group-hover:text-white transition-colors">
-                      {exp.company}
-                      <span className="block md:inline text-sm text-gray-400 md:ml-2">{exp.period}</span>
-                    </h3>
-                    <span className="text-white bg-blue-600 px-3 py-1 rounded-full text-xs">{exp.role}</span>
-                  </div>
-                  
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {exp.technologies.map(tech => (
-                      <span key={tech} className="text-xs bg-gray-800 px-3 py-1 rounded-full">{tech}</span>
-                      
-                    ))}
-                  </div>
-                </div>
-                
-                <div 
-                  className={`px-6 pb-4 pt-0 overflow-hidden transition-all duration-500 ${expandedCards.includes(index) ? 'max-h-[500px]' : 'max-h-0'}`}
-                >
-                  <ul className="space-y-3 text-gray-300 pl-5 list-disc mt-4">
-                    {exp.bullets.map((bullet, i) => (
-                      <li key={i}>{bullet}</li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-              
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="projects" className="min-h-screen w-full bg-black text-white font-mono py-16 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-4 text-center">My Projects</h2>
+    <section id="experience" className="relative w-full bg-black text-white font-mono py-16 px-4 md:px-8">
+      <div 
+        className="absolute inset-0 bg-no-repeat bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${section2})`,
+          filter: 'blur(3px)',
+          opacity: 0.9
+        }}
+      />  
+      <div className="absolute inset-0 z-0"></div>
+      <div className="relative z-20 max-w-6xl mx-auto"> 
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4 text-white">My Experience</h2>
           <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
-          <div className="grid md:grid-cols-2 gap-8 mt-6">
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+        </div>
+        
+        <div className="max-w-6xl mx-auto space-y-6">
+          {experiences.map((exp, index) => (
+            <motion.div 
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+              
+              className={`group relative overflow-hidden rounded-xl border border-gray-800 hover:border-blue-600 transition-all duration-300 cursor-pointer ${expandedCards.includes(index) ? 'border-blue-600' : ''}`}
+              onClick={() => toggleCard(index)}
             >
-              <div 
-                key={project.id}
-                className={`bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 ${expandedProject === project.id ? 'expanded' : ''}`}
-              >
-                <div 
-                  className={`h-48 flex items-center justify-center cursor-pointer object-cover bg-cover bg-center`}
-                  style={{ backgroundImage: `url(${project.bgImage})` }}
-                  onClick={() => toggleExpand(project.id)}
-                >
+              <div className="w-full text-left p-6">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-baseline">
+                  <h3 className="text-2xl font-semibold text-blue-400  transition-colors">
+                    {exp.company}
+                    <span className="block md:inline text-sm text-gray-400 md:ml-2">{exp.period}</span>
+                  </h3>
+                  <span className="text-white bg-blue-600 px-3 py-1 rounded-full text-sm">{exp.role}</span>
                 </div>
                 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-blue-400">{project.title}</h3>
-                    <button 
-                      onClick={() => toggleExpand(project.id)}
-                      className="text-gray-400 hover:text-white focus:outline-none"
-                    >
-                      {expandedProject === project.id ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  
-                  <p className="text-gray-300 mb-4">{project.description}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.technologies.map((tech, index) => (
-                      <span key={index} className="text-xs bg-gray-800 px-2 py-1 rounded">{tech}</span>
-                    ))}
-                  </div>
-                  
-                  {expandedProject === project.id && (
-                    <div className="mt-4 space-y-4 animate-fadeIn">
-                      <p className="text-gray-300">{project.longDescription}</p>
-                      <div className="flex gap-4">
-                        {project.links.map((link, index) => (
-                          <a 
-                            key={index}
-                            href={link.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className={`inline-block ${link.type === 'demo' ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white font-medium py-2 px-4 rounded transition-colors`}
-                          >
-                            {link.type === 'demo' ? 'View Demo' : 'View Code'}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {expandedProject !== project.id && (
-                    <a 
-                      href={project.links[0].url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block text-blue-400 hover:text-blue-300 text-sm font-medium"
-                    >
-                      View Project →
-                    </a>
-                  )}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {exp.technologies.map(tech => (
+                    <span key={tech} className="text-xs bg-gray-800 px-3 py-1 rounded-full">{tech}</span>
+                  ))}
                 </div>
               </div>
-            </motion.div>
-            ))}
-          </div>
+              
+              <div 
+                className={`px-6 pb-4 pt-0 overflow-hidden transition-all duration-500 ${expandedCards.includes(index) ? 'max-h-[500px]' : 'max-h-0'}`}
+              >
+                <ul className="space-y-3 text-gray-300 pl-5 list-disc mt-4">
+                  {exp.bullets.map((bullet, i) => (
+                    <li key={i}>{bullet}</li>
+                  ))}
+                </ul>
+              </div>
+             </motion.div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
+
+
+      <section id="projects" className="min-h-screen w-full bg-black text-white font-mono py-16 px-4 md:px-8">
+  <div className="max-w-6xl mx-auto">
+    <h2 className="text-4xl font-bold mb-4 text-center">My Projects</h2>
+    <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
+    <div className="grid md:grid-cols-2 gap-8 mt-6">
+      {projects.map((project) => (
+        <motion.div
+          key={project.id}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+        >
+          <div 
+            className={`bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 ${
+              expandedProject === project.id ? 'h-auto' : 'h-96'
+            }`}
+          >
+            {/* Project Image */}
+            <div 
+              className="h-48 w-full bg-cover bg-center cursor-pointer"
+              style={{ backgroundImage: `url(${project.bgImage})` }}
+              onClick={() => toggleExpand(project.id)}
+            />
+            
+            {/* Project Content */}
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xl font-bold text-blue-400">{project.title}</h3>
+                <button 
+                  onClick={() => toggleExpand(project.id)}
+                  className="text-gray-400 hover:text-white focus:outline-none"
+                >
+                  {expandedProject === project.id ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+                {expandedProject === project.id && (
+  <button 
+    onClick={() => setExpandedProject(null)}
+    className="absolute top-4 right-4 text-gray-400 hover:text-white"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+)}
+              </div>
+              
+              <p className="text-gray-300 mb-4">{project.description}</p>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                {project.technologies.map((tech, index) => (
+                  <span key={index} className="text-xs bg-gray-800 px-2 py-1 rounded">{tech}</span>
+                ))}
+              </div>
+              
+              {/* Expanded Content */}
+              {expandedProject === project.id && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 space-y-4"
+                >
+                  <p className="text-gray-300">{project.longDescription}</p>
+                  <div className="flex gap-4">
+                    {project.links.map((link, index) => (
+                      <a 
+                        key={index}
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`inline-block ${
+                          link.type === 'demo' 
+                            ? 'bg-green-500 hover:bg-green-600' 
+                            : 'bg-blue-500 hover:bg-blue-600'
+                        } text-white font-medium py-2 px-4 rounded transition-colors`}
+                      >
+                        {link.type === 'demo' ? 'View Demo' : 'View Code'}
+                      </a>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+              
+              {/* Collapsed State Link */}
+              {expandedProject !== project.id && (
+                <a 
+                  href={project.links[0].url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block text-blue-400 hover:text-blue-300 text-sm font-medium"
+                >
+                  View Project →
+                </a>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
 
       <section 
       id="contact" 
@@ -769,10 +817,10 @@ const Home = () => {
                 <div>
                   <h4 className="font-medium text-white mb-1">Email</h4>
                   <a 
-                    href="mailto:Redoncanal1@gmail.com" 
+                    href="mailto:Redoncanaj1@gmail.com" 
                     className="text-gray-300 hover:text-blue-400 transition-colors"
                   >
-                    Redoncanal1@gmail.com
+                    Redoncanaj1@gmail.com
                   </a>
                 </div>
               </div>
@@ -820,7 +868,7 @@ const Home = () => {
               variants={container}
               className="pt-6 "
             >
-              <h3 className="text-2xl font-semibold mb-6  text-blue-400">Connect With Me</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-blue-400">Connect With Me</h3>
               <div className="flex space-x-6">
                 {[
                   { icon: <FiGithub />, url: "https://github.com/redoncanaj1" },
@@ -837,7 +885,7 @@ const Home = () => {
                     whileHover={{ 
                       y: -5,
                       scale: 1.2,
-                      color: "#60a5fa"
+                      
                     }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -848,7 +896,6 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -951,13 +998,7 @@ const Home = () => {
       </div>
     </section>
     <section>
-    <motion.footer 
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={item}
-      className="bg-gray-900 text-gray-300 py-12 px-6 border-t border-gray-800"
-    >
+    <div id='footer' className="bg-gray-900 text-gray-300 py-6 px-6 border-t border-gray-800">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Left side - Branding */}
@@ -981,7 +1022,7 @@ const Home = () => {
 
           <motion.div 
             variants={item}
-            className="flex space-x-6"
+            className="flex space-x-6 mt-6 md:mt-0"
           >
             {[
               { icon: <FiGithub />, url: "https://github.com/redoncanaj1" },
@@ -996,8 +1037,12 @@ const Home = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-2xl text-gray-400 hover:text-blue-400"
-                whileHover="hover"
-                whileTap="tap"
+                whileHover={{ 
+                  y: -5,
+                  scale: 1.2,
+                  
+                }}
+                whileTap={{ scale: 0.9 }}
               >
                 {social.icon}
               </motion.a>
@@ -1007,7 +1052,7 @@ const Home = () => {
 
         
       </div>
-    </motion.footer>
+    </div>
     </section>
         </>
         );
